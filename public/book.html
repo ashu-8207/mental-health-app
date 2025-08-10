@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Book a Slot – Tapasyaaa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pastelgreen: { 500: '#86efac', 600: '#4ade80' },
+            pastelblue: { 100: '#dbeafe', 200: '#bfdbfe' }
+          },
+          fontFamily: { sans: ['Poppins', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-pastelblue-100 font-sans min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <nav class="bg-pastelgreen-500 text-white p-4 text-center text-2xl font-bold">Tapasyaaa</nav>
+
+  <main class="flex-grow p-6 max-w-xl mx-auto text-center space-y-6">
+    <h1 class="text-3xl font-semibold text-pastelgreen-600">📅 Book a Session</h1>
+    <form class="bg-white rounded-lg shadow p-6 space-y-4">
+      <input type="text" placeholder="Your Name" class="w-full px-4 py-2 border rounded" required />
+      <input type="email" placeholder="Email Address" class="w-full px-4 py-2 border rounded" required />
+      <select class="w-full px-4 py-2 border rounded">
+        <option>Select Slot</option>
+        <option>Monday - 10AM</option>
+        <option>Tuesday - 3PM</option>
+        <option>Friday - 6PM</option>
+      </select>
+      <textarea placeholder="Anything you'd like to share..." class="w-full px-4 py-2 border rounded" rows="4"></textarea>
+      <button type="submit" class="w-full bg-pastelgreen-600 text-white py-2 rounded hover:bg-pastelgreen-500">
+        Confirm Booking
+      </button>
+    </form>
+  </main>
+
+  <footer class="text-center text-sm text-gray-500 py-4">
+    <a href="privacy.html" class="hover:underline">Privacy Policy</a>
+  </footer>
+</body>
+</html>

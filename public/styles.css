@@ -1,0 +1,22 @@
+/* public/styles.css */
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #f2f7f9;
+  color: #333;
+}
+input {
+  padding: 10px;
+  margin: 5px;
+}
+#messages {
+  border: 1px solid #ccc;
+  height: 200px;
+  overflow-y: scroll;
+  padding: 10px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+.hidden {
+  display: none;
+}
