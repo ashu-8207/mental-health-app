@@ -1,71 +1,94 @@
-// server.js
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
 const cors = require('cors');
+const { Server } = require('socket.io');
 const path = require('path');
 
 const app = express();
-app.use(cors());
+app.use(cors()); // Allow all origins (adjust for production)
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: { origin: "*" }
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Change to your frontend URL in production
+    methods: ["GET", "POST"]
+  }
 });
 
+// In-memory storage (MVP level)
 let users = {};
 let sessions = {};
 
-app.use(express.static(path.join(__dirname, 'public')));
-
+// Register user pseudonym (no sensitive info)
 app.post('/register', (req, res) => {
-    const { username } = req.body;
-    if (!username) return res.status(400).json({ error: "Username required" });
-    if (users[username]) return res.status(400).json({ error: "Username taken" });
-    users[username] = { username };
-    res.json({ success: true });
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: "Username is required" });
+  if (users[username]) return res.status(400).json({ error: "Username already taken" });
+  users[username] = { username };
+  console.log(`User registered: ${username}`);
+  res.json({ success: true });
 });
 
-app.get('/resources', (req, res) => {
-    res.json({
-        resources: [
-            { title: 'Breathing Techniques', content: 'Breathe in 4 seconds, hold 4, out 4...' },
-            { title: 'Mental Health Hotline', content: 'Call 988 (USA Crisis Support)' },
-            { title: 'You Are Not Alone', content: 'This space is safe. We’re here for you.' }
-        ]
-    });
-});
-
+// Serve privacy policy page
 app.get('/privacy', (req, res) => {
-    res.sendFile(path.join(__dirname, 'privacy.html'));
+  res.sendFile(path.join(__dirname, 'privacy.html'), err => {
+    if (err) {
+      console.error('Error sending privacy page:', err);
+      res.status(500).send("Internal Server Error");
+    }
+  });
 });
 
+// Serve basic mental health resources
+app.get('/resources', (req, res) => {
+  res.json({
+    resources: [
+      { title: 'Coping Strategies', content: 'Breathing exercises, journaling...' },
+      { title: 'Signs of Crisis', content: 'Reach out to hotlines immediately...' }
+    ]
+  });
+});
+
+// Socket.io connection handling
 io.on('connection', (socket) => {
-    console.log('New user connected');
+  console.log(`New socket connection: ${socket.id}`);
 
-    socket.on('joinSession', ({ username }) => {
-        if (!username || !users[username]) {
-            socket.emit('errorMessage', 'User not registered');
-            return;
-        }
-        let sessionId = `session-${username}`;
-        socket.join(sessionId);
-        sessions[socket.id] = { username, sessionId };
-        socket.emit('message', { sender: 'system', text: `Welcome ${username}, you are not alone.` });
-    });
+  socket.on('joinSession', ({ username }) => {
+    if (!username || !users[username]) {
+      socket.emit('errorMessage', 'User not registered.');
+      return;
+    }
+    const sessionId = 'session1'; // Single session in this MVP
+    socket.join(sessionId);
+    sessions[socket.id] = { username, sessionId };
+    io.to(sessionId).emit('message', { sender: 'system', text: `${username} joined the session.` });
+    console.log(`${username} joined session ${sessionId}`);
+  });
 
-    socket.on('chatMessage', (msg) => {
-        const session = sessions[socket.id];
-        if (!session) return;
-        io.to(session.sessionId).emit('message', { sender: session.username, text: msg });
-    });
+  socket.on('chatMessage', (msg) => {
+    const session = sessions[socket.id];
+    if (!session) {
+      socket.emit('errorMessage', 'No active session found.');
+      return;
+    }
+    io.to(session.sessionId).emit('message', { sender: session.username, text: msg });
+    console.log(`Message from ${session.username}: ${msg}`);
+  });
 
-    socket.on('disconnect', () => {
-        delete sessions[socket.id];
-        console.log('User disconnected');
-    });
+  socket.on('disconnect', () => {
+    const session = sessions[socket.id];
+    if (session && session.username && session.sessionId) {
+      io.to(session.sessionId).emit('message', { sender: 'system', text: `${session.username} left the session.` });
+      console.log(`User disconnected: ${session.username}`);
+      delete sessions[socket.id];
+    } else {
+      console.log(`Socket disconnected: ${socket.id}`);
+    }
+  });
 });
 
-const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
