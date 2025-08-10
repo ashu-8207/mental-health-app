@@ -1,17 +1,18 @@
 {
   "name": "mental_health_app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A safe space for mental health support",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "socket.io": "^4.8.1"
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
   }
 }
+
